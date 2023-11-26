@@ -1,0 +1,31 @@
+import os
+import pandas as pd
+from tabula import read_pdf
+
+def process_pdfs_to_excel(input_directory, output_excel):
+    try:
+        with pd.ExcelWriter(output_excel, engine="openpyxl") as excel_file:
+            for file_name in os.listdir(input_directory):
+                if file_name.endswith(".pdf"):
+                    pdf_path = os.path.join(input_directory, file_name)
+
+                    try:
+                        tables = read_pdf(pdf_path, pages='all', multiple_tables=True)
+
+                        if len(tables) >= 2:
+                            df = tables[1]
+                            sheet_name = file_name[:-4]
+                            df.to_excel(excel_file, sheet_name=sheet_name, index=False)
+
+
+                    except Exception as e:
+                        print(f"Error processing {file_name}: {e}")
+
+        print("Done")
+
+    except Exception as e:
+        print(f"An unexpected error occurred: {e}")
+
+pdf_directory = "/home/meline/PycharmProjects/VAT/aahpdf"
+output_excel = "output.xlsx"
+process_pdfs_to_excel(pdf_directory, output_excel)
